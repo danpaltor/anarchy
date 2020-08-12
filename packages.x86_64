@@ -1,4 +1,4 @@
-# Archiso
+acpi
 arch-install-scripts
 b43-fwcutter
 broadcom-wl
@@ -20,6 +20,7 @@ ethtool
 exfat-utils
 f2fs-tools
 fsarchiver
+git
 gnu-netcat
 gpm
 gptfdisk
@@ -52,6 +53,7 @@ ntp
 openconnect
 openssh
 openvpn
+pacman-contrib
 partclone
 parted
 partimage
@@ -66,6 +68,7 @@ sg3_utils
 smartmontools
 sudo
 tcpdump
+terminus-font
 testdisk
 usb_modeswitch
 usbutils
@@ -79,11 +82,4 @@ wpa_supplicant
 wvdial
 xfsprogs
 xl2tpd
-
-# Anarchy
-acpi
-git
-networkmanager
-pacman-contrib
-terminus-font
 zsh-syntax-highlighting

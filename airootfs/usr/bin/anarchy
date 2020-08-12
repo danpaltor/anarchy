@@ -1,7 +1,8 @@
 #!/bin/sh
 # Copyright (C) 2017 Dylan Schacht
+# Copyright (C) 2020 Erazem Kokot
 
-VERSION='1.2.1'
+VERSION='1.2.0'
 
 . libanarchy.sh
 . /etc/anarchy.conf
@@ -96,15 +97,17 @@ else
 			git clone https://gitlab.com/anarchyinstaller/installer \
 					"${tmp_dir}" || { echo 'Failed to clone git repo'; exit 1; }
 			cp -f "${tmp_dir}"/airootfs/usr/bin/* /usr/bin/ || exit 1
-			cp -fr "${tmp_dir}"/airootfs/etc/* /etc/ || exit 1
-			cp -f "${tmp_dir}"/airootfs/root/* /root/ || exit 1
+			cp -f "${tmp_dir}"/airootfs/etc/anarchy.conf /etc/anarchy.conf || \
+					exit 1
 			cp -f "${tmp_dir}"/airootfs/usr/lib/anarchy/* /usr/lib/anarchy/ || \
 					exit 1
-			cp -fr "${tmp_dir}"/airootfs/usr/share/anarchy/* \
-					/usr/share/anarchy/ || exit 1
+			cp -f "${tmp_dir}"/airootfs/usr/share/anarchy/lang/* \
+					/usr/share/anarchy/lang/ || exit 1
+			cp -f "${tmp_dir}"/airootfs/usr/share/anarchy/extra/wallpapers/* \
+					/usr/share/anarchy/extra/wallpapers/ || exit 1
+			cp -rf "${tmp_dir}"/airootfs/usr/share/anarchy/extra/* \
+					/usr/share/anarchy/extra/ || exit 1
 			echo 'Finished updating Anarchy'
-			echo 'To start the installation run the "anarchy" command'
-			echo 'To return to the main menu run the "start" command'
 		else
 			wifi-menu -o
 		fi

@@ -7,7 +7,8 @@ reboot_system() {
 	if "${INSTALLED}"; then
 		# Check if user has a bootloader installed
 		if [ "${bootloader}" = "${none}" ]; then
-			if (yesno "\n${complete_no_boot_msg}" "${yes}" "${no}"); then
+			if (dialog --yes-button "${yes}" --no-button "${no}" --yesno \
+				"\n${complete_no_boot_msg}" 10 60); then
 				reset
 				exit
 			fi
@@ -47,7 +48,7 @@ reboot_system() {
 				;;
 			"${reboot2}") # Anarchy Chroot function
 				clear
-				echo -e "${arch_chroot_msg}"
+				echo "${arch_chroot_msg}"
 				echo "/root" >/tmp/chroot_dir.var
 				anarchy_chroot
 				clear
@@ -68,7 +69,8 @@ reboot_system() {
 		done
 	else
 		# Warn user install not complete, prompt for reboot
-		if (yesno "${not_complete_msg}" "${yes}" "${no}"); then
+		if (dialog --yes-button "${yes}" --no-button "${no}" --yesno \
+			"${not_complete_msg}" 10 60); then
 			umount -R "${ARCH}"
 			reset
 			reboot
@@ -103,7 +105,8 @@ main_menu() {
 			;;
 		"${menu3}") # Prepare drives check if mounted
 			if "${mounted}"; then
-				if (yesno "\n${menu_err_msg3}" "${yes}" "${no}" 1); then
+				if (dialog --yes-button "${yes}" --no-button "${no}" --defaultno \
+					--yesno "\n${menu_err_msg3}" 10 60); then
 					mounted=false
 					prepare_drives
 				fi
@@ -121,7 +124,8 @@ main_menu() {
 				configure_system
 				add_user
 				reboot_system
-			elif (yesno "\n${install_err_msg1}" "${yes}" "${no}"); then
+			elif (dialog --yes-button "${yes}" --no-button "${no}" --yesno \
+				"\n${install_err_msg1}" 10 60); then
 				prepare_drives
 			fi
 			;;
@@ -129,7 +133,8 @@ main_menu() {
 			reboot_system
 			;;
 		"${menu12}") # Exit installer
-			if (yesno "\n${menu_exit_msg}" "${yes}" "${no}"); then
+			if (dialog --yes-button "${yes}" --no-button "$no" --yesno \
+				"\n${menu_exit_msg}" 10 60); then
 				reset
 				exit
 			fi

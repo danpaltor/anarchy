@@ -37,7 +37,7 @@ install_base() {
 
     until "$INSTALLED"
       do
-        if (yesno "\n${install_var}" "${install}" "${cancel}"); then
+        if (dialog --yes-button "$install" --no-button "$cancel" --yesno "\n$install_var" "$height" 65); then
             echo "$(date -u "+%F %H:%M") : Begin base install" >> "$log"
 
             if [ "$kernel" == "linux" ]; then
@@ -56,22 +56,21 @@ install_base() {
                 echo "$(date -u "+%F %H:%M") : Install Complete" >> "$log"
                 echo "$(date -u "+%F %H:%M") : Generate fstab:\n$(<$ARCH/etc/fstab)" >> "$log"
             else
-                msg "\n${failed_msg}"
+                dialog --ok-button "$ok" --msgbox "\n$failed_msg" 10 60
                 echo "$(date -u "+%F %H:%M") : Install failed: please report to developer" >> "$log"
                 reset ; tail "$log" ; exit 1
             fi
 
-            case "${bootloader}" in
+            case "$bootloader" in
                 grub) grub_config ;;
                 syslinux) syslinux_config ;;
                 systemd-boot) systemd_config ;;
                 efistub) efistub_config ;;
-                refind) refind_config ;;
             esac
 
             echo "$(date -u "+%F %H:%M") : Configured bootloader: $bootloader" >> "$log"
         else
-            if (yesno "\n${exit_msg}" "${yes}" "${no}"); then
+            if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$exit_msg" 10 60) then
                 unset base_install DE
                 desktop=false
                 main_menu

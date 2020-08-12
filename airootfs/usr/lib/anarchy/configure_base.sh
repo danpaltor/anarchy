@@ -26,7 +26,7 @@ install_options() {
                          "Anarchy-Server-LTS"    "$install_opt4" \
              "Anarchy-Advanced"      "$install_opt0" 3>&1 1>&2 2>&3)
                  if [ "$?" -gt "0" ]; then
-                          if (yesno "\n${exit_msg}" "${yes}" "${no}" 1) then
+                          if (dialog --defaultno --yes-button "$yes" --no-button "$no" --yesno "\n$exit_msg" 10 60) then
                                   main_menu
                           fi
                  else
@@ -59,7 +59,7 @@ prepare_base() {
             "Arch-Linux-Zen"		"$zen_msg0" \
             "Arch-Linux-Zen-Devel"		"$zen_msg1" 3>&1 1>&2 2>&3)
         if [ "$?" -gt "0" ]; then
-            if (yesno "\n${exit_msg}" "${yes}" "${no}" 1) then
+            if (dialog --defaultno --yes-button "$yes" --no-button "$no" --yesno "\n$exit_msg" 10 60) then
                 main_menu
             fi
         else
@@ -104,7 +104,7 @@ prepare_base() {
             "tcsh"	"$shell3" \
             "zsh"	"$shell4" 3>&1 1>&2 2>&3)
         if [ "$?" -gt "0" ]; then
-            if (yesno "\n${exit_msg}" "${yes}" "${no}" 1) then
+            if (dialog --defaultno --yes-button "$yes" --no-button "$no" --yesno "\n$exit_msg" 10 60) then
                 main_menu
             fi
         else
@@ -136,20 +136,15 @@ prepare_base() {
         fi
     done
 
-    #
-    # Bootloader selection
-    #
-    base_install+="${UCODE} "
     while (true)
       do
         if "$UEFI" ; then
             bootloader=$(dialog --ok-button "$ok" --cancel-button "$cancel" --menu "$loader_type_msg" 13 64 4 \
-                "grub"			"${loader_msg}"    \
-                "syslinux"		"${loader_msg1}"   \
-                "systemd-boot"	"${loader_msg2}"   \
-                "efistub"	    "${loader_msg3}"   \
-                "refind"        "${loader_msg4}"   \
-                "${none}" "-" 3>&1 1>&2 2>&3)
+                "grub"			"$loader_msg" \
+                "syslinux"		"$loader_msg1" \
+                "systemd-boot"	"$loader_msg2" \
+                "efistub"	    "$loader_msg3" \
+                "$none" "-" 3>&1 1>&2 2>&3)
             ex="$?"
         else
             bootloader=$(dialog --ok-button "$ok" --cancel-button "$cancel" --menu "$loader_type_msg" 12 64 3 \
@@ -160,20 +155,17 @@ prepare_base() {
         fi
 
         if [ "$ex" -gt "0" ]; then
-            if (yesno "\n${exit_msg}" "${yes}" "${no}" 1) then
+            if (dialog --defaultno --yes-button "$yes" --no-button "$no" --yesno "\n$exit_msg" 10 60) then
                 main_menu
             fi
         elif [ "$bootloader" == "systemd-boot" ]; then
             break
         elif [ "$bootloader" == "efistub" ]; then
             break
-        elif [ "${bootloader}" == "refind" ]; then
-            base_install+="refind "
-            break
         elif [ "$bootloader" == "syslinux" ]; then
             if ! "$UEFI" ; then
                 if (tune2fs -l /dev/"$BOOT" | grep "64bit" &> /dev/null); then
-                    if (yesno "\n${syslinux_warn_msg}" "${yes}" "${no}") then
+                    if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$syslinux_warn_msg" 11 60) then
                         mnt=$(df | grep -w "$BOOT" | awk '{print $6}')
                         (umount "$mnt"
                         wipefs -a /dev/"$BOOT"
@@ -195,8 +187,8 @@ prepare_base() {
             base_install+="$bootloader "
             break
         else
-            if (yesno "\n${grub_warn_msg0}" "${yes}" "${no}" 1) then
-                msg "\n${grub_warn_msg1}"
+            if (dialog --defaultno --yes-button "$yes" --no-button "$no" --yesno "\n$grub_warn_msg0" 10 60) then
+                dialog --ok-button "$ok" --msgbox "\n$grub_warn_msg1" 10 60
                 break
             fi
         fi
@@ -210,7 +202,7 @@ prepare_base() {
             "$none" "-" 3>&1 1>&2 2>&3)
 
         if [ "$?" -gt "0" ]; then
-            if (yesno "\n${exit_msg}" "${yes}" "${no}" 1) then
+            if (dialog --defaultno --yes-button "$yes" --no-button "$no" --yesno "\n$exit_msg" 10 60) then
                 main_menu
             fi
         else
@@ -221,12 +213,12 @@ prepare_base() {
         fi
     done
 
-    if (yesno "\n\n${multilib_msg}" "${yes}" "${no}") then
+    if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n\n$multilib_msg" 11 60) then
         multilib=true
         echo "$(date -u "+%F %H:%M") : Include multilib" >> "$log"
     fi
 
-    if (yesno "\n\n${dhcp_msg}" "${yes}" "${no}") then
+    if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n\n$dhcp_msg" 11 60) then
         dhcp=true
         echo "$(date -u "+%F %H:%M") : Enable dhcp" >> "$log"
     fi
@@ -234,23 +226,23 @@ prepare_base() {
     if "$wifi" ; then
         base_install+="wireless_tools wpa_supplicant "
     else
-        if (yesno "\n${wifi_option_msg}" "${yes}" "${no}" 1) then
+        if (dialog --defaultno --yes-button "$yes" --no-button "$no" --yesno "\n$wifi_option_msg" 10 60) then
             base_install+="wireless_tools wpa_supplicant "
         fi
     fi
 
     if "$bluetooth" ; then
-        if (yesno "\n${bluetooth_msg}" "${yes}" "${no}" 1) then
+        if (dialog --defaultno --yes-button "$yes" --no-button "$no" --yesno "\n$bluetooth_msg" 10 60) then
             base_install+="bluez bluez-utils pulseaudio-bluetooth "
             enable_bt=true
         fi
     fi
 
-    if (yesno "\n${pppoe_msg}" "${yes}" "${no}" 1) then
+    if (dialog --defaultno --yes-button "$yes" --no-button "$no" --yesno "\n$pppoe_msg" 10 60) then
         base_install+="rp-pppoe "
     fi
 
-    if (yesno "\n${os_prober_msg}" "${yes}" "${no}" 1) then
+    if (dialog --defaultno --yes-button "$yes" --no-button "$no" --yesno "\n$os_prober_msg" 10 60) then
         base_install+="os-prober "
     fi
 
@@ -267,7 +259,7 @@ prepare_base() {
 add_software() {
 
     op_title="$software_op_msg"
-    if (yesno "\n${software_msg0}" "${yes}" "${no}") then
+    if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$software_msg0" 10 60) then
 
         while (true)
           do
@@ -294,7 +286,7 @@ add_software() {
                 ex="$?"
 
                 if [ "$ex" -eq "1" ]; then
-                    if (yesno "\n${software_warn_msg}" "${yes}" "${no}" 1) then
+                    if (dialog --yes-button "$yes" --no-button "$no" --defaultno --yesno "\n$software_warn_msg" 10 60) then
                         break
                     else
                         add_soft=false
@@ -395,7 +387,7 @@ add_software() {
                         while (true)
                           do
                             if ! "$multilib" ; then
-                                if (yesno "\n${steam_add_msg}" "${yes}" "${no}") then
+                                if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$steam_add_msg" 10 60) then
                                     multilib=true
                                 else
                                     software=$(<<<"$software" sed 's/steam//')
@@ -540,69 +532,62 @@ add_software() {
                 ;;
                 "$servers")
                     software=$(dialog --ok-button "$ok" --cancel-button "$cancel" --checklist "$software_msg1" 20 63 10 \
-                        "LAMP Stack"		"${srv1}" OFF \
-                        "LEMP Stack"		"${srv2}" OFF \
-                        "apache"		"${sys1}" OFF \
-                        "bind"			"${srv10}" OFF \
-                        "cups"			"${srv11}" OFF \
-                        "lighttpd"		"${srv5}" OFF \
-                        "nginx"			"${srv3}" OFF \
-                        "nginx-mainline"	"${srv4}" OFF \
-                        "openssh"		"${sys10}" OFF \
-                        "postfix"		"${srv6}" OFF \
-                        "samba"			"${srv9}" OFF \
-                        "squid"			"${srv8}" OFF \
-                        "vsftpd"		"${srv7}" OFF \
-                        "dhcpcd"		"${srv12}" OFF 3>&1 1>&2 2>&3)
+                        "LAMP Stack"		"$srv1" OFF \
+                        "LEMP Stack"		"$srv2" OFF \
+                        "apache"		"$sys1" OFF \
+                        "bind"			"$srv10" OFF \
+                        "cups"			"$srv11" OFF \
+                        "lighttpd"		"$srv5" OFF \
+                        "nginx"			"$srv3" OFF \
+                        "nginx-mainline"	"$srv4" OFF \
+                        "openssh"		"$sys10" OFF \
+                        "postfix"		"$srv6" OFF \
+                        "samba"			"$srv9" OFF \
+                        "squid"			"$srv8" OFF \
+                        "vsftpd"		"$srv7" OFF 3>&1 1>&2 2>&3)
                     if [ "$?" -gt "0" ]; then
                         add_soft=false
                     fi
 
-                    if (grep "dhcpcd" <<<"${software}" &>/dev/null); then
-                        if (yesno "\n${dhcp_msg}" "${yes}" "${no}") then
-                            dhcp=true
-                        fi
-                    fi
-
                     if (grep "LAMP" <<<"$software" &>/dev/null); then
-                        if (yesno "\n${apache_msg}" "${yes}" "${no}") then
+                        if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$apache_msg" 10 60) then
                             config_http="LAMP"
                             enable_http=true
                         fi
                         software=$(<<<"$software" sed 's/LAMP Stack/apache php php-apache mariadb/')
                     elif (grep "LEMP" <<<"$software" &>/dev/null); then
-                        if (yesno "\n${nginx_msg}" "${yes}" "${no}") then
+                        if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$nginx_msg" 10 60) then
                             config_http="LEMP"
                             enable_http=true
                         fi
                         software=$(<<<"$software" sed 's/LEMP Stack/nginx-mainline php php-fpm mariadb/')
                     elif (grep "apache" <<<"$software" &>/dev/null); then
-                        if (yesno "\n${apache_msg}" "${yes}" "${no}") then
+                        if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$apache_msg" 10 60) then
                             config_http="apache"
                             enable_http=true
                         fi
                     elif (grep "nginx" <<<"$software" &>/dev/null); then
-                        if (yesno "\n${nginx_msg}" "${yes}" "${no}") then
+                        if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$nginx_msg" 10 60) then
                             config_http="nginx"
                             enable_http=true
                         fi
                     fi
 
                     if (grep "openssh" <<<"$software" &>/dev/null); then
-                        if (yesno "\n${ssh_msg}" "${yes}" "${no}") then
+                        if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$ssh_msg" 10 60) then
                             enable_ssh=true
                         fi
                     fi
 
                     if (grep "cups" <<<"$software" &>/dev/null); then
                         software=$(<<<"$software" sed 's/cups/cups cups-pdf/')
-                        if (yesno "\n${cups_msg}" "${yes}" "${no}") then
+                        if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$cups_msg" 10 60) then
                             enable_cups=true
                         fi
                     fi
 
                     if ! "$enable_ftp" ; then
-                        if (yesno "\n${ftp_msg}" "${yes}" "${no}") then
+                        if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$ftp_msg" 10 60) then
                             enable_ftp=true
                             if (<<<"$software" grep "vsftpd" &>/dev/null); then
                                 ftp="vsftpd"
@@ -657,7 +642,7 @@ add_software() {
                     fi
 
                     if (<<<"$software" grep "xmonad") then
-                        if (yesno "\n${extra_msg5}" "${yes}" "${no}") then
+                        if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$extra_msg5" 10 60) then
                             software+=" xmonad-contrib"
                         fi
                     fi
@@ -688,25 +673,25 @@ add_software() {
                     fi
 
                     if (<<<"$software" grep "xfce4") then
-                        if (yesno "\n${extra_msg0}" "${yes}" "${no}") then
+                        if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$extra_msg0" 10 60) then
                             software+=" xfce4-goodies"
                         fi
                     fi
 
                     if (<<<"$software" grep "gnome") then
-                        if (yesno "\n${extra_msg1}" "${yes}" "${no}") then
+                        if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$extra_msg1" 10 60) then
                             software+=" gnome-extra"
                         fi
                     fi
 
                     if (<<<"$software" grep "gnome-flashback") then
-                        if (yesno "\n${extra_msg1}" "${yes}" "${no}") then
+                        if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$extra_msg1" 10 60) then
                             software+=" gnome-backgrounds gnome-control-center gnome-screensaver gnome-applets sensors-applet"
                         fi
                     fi
 
                     if (<<<"$software" grep "mate") then
-                        if (yesno "\n${extra_msg2}" "${yes}" "${no}") then
+                        if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$extra_msg2" 10 60) then
                             software+=" mate-extra gtk-engine-murrine"
                         else
                             software+=" gtk-engine-murrine"
@@ -714,7 +699,7 @@ add_software() {
                     fi
 
                     if (<<<"$software" grep "deepin") then
-                        if (yesno "\n${extra_msg4}" "${yes}" "${no}") then
+                        if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$extra_msg4" 10 60) then
                             software+=" deepin-extra $kernel-headers"
                         fi
                     fi
@@ -724,7 +709,7 @@ add_software() {
                     fi
 
                     if (<<<"$software" grep "lxde") then
-                        if (yesno "\n${gtk3_var}" "${yes}" "${no}") then
+                        if (dialog --yes-button "$yes" --no-button "$no" --yesno "\n$gtk3_var" 10 60) then
                             software+="lxde-gtk3 "
                         fi
                     fi
@@ -738,7 +723,7 @@ add_software() {
                     fi
 
                     if (<<<"$software" grep "KDE") then
-                        if (yesno "\n${extra_msg3}" "${yes}" "${no}" 1) then
+                        if (dialog --defaultno --yes-button "$yes" --no-button "$no" --yesno "\n$extra_msg3" 10 60) then
                             software=$(<<<"$software" sed 's/KDE plasma/plasma-desktop konsole dolphin plasma-nm plasma-pa libxshmfence kscreen/')
                             if "$LAPTOP" ; then
                                 software+=" powerdevil"
@@ -751,7 +736,7 @@ add_software() {
                 ;;
                 "$done_msg")
                     if [ -z "$final_software" ]; then
-                        if (yesno "\n${software_warn_msg}" "${yes}" "${no}" 1) then
+                        if (dialog --yes-button "$yes" --no-button "$no" --defaultno --yesno "\n$software_warn_msg" 10 60) then
                             break
                         else
                             add_soft=false
@@ -779,7 +764,7 @@ add_software() {
                                 height=20
                             fi
 
-                            if (yesno "\n${software_confirm_var1}" "${install}" "${cancel}") then
+                            if (dialog --yes-button "$install" --no-button "$cancel" --yesno "\n$software_confirm_var1" "$height" 65) then
                                 arch-chroot "${ARCH}" pacman --noconfirm -Sy archlinux-keyring &>>"${log}" &
                                 arch-chroot "$ARCH" pacman --noconfirm -Sy $(echo "$download") &>>"$log" &
                                 pid=$! pri=$(<<<"$down" sed 's/\..*$//') msg="\n$software_load_var" load_log
@@ -798,7 +783,7 @@ add_software() {
 
             if "$add_soft" ; then
                 if [ -z "$software" ]; then
-                    if ! (yesno "\n${software_noconfirm_msg} ${software_menu}?" "${yes}" "${no}" 1) then
+                    if ! (dialog --yes-button "$yes" --no-button "$no" --defaultno --yesno "\n$software_noconfirm_msg ${software_menu}?" 10 60) then
                         skip=true
                     fi
                 else
@@ -818,7 +803,7 @@ add_software() {
                         height=16
                     fi
 
-                    if (yesno "\n${software_confirm_var0}" "${add}" "${cancel}") then
+                    if (dialog --yes-button "$add" --no-button "$cancel" --yesno "\n$software_confirm_var0" "$height" 60) then
                         final_software+="$software "
                     fi
                 fi
